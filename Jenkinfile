@@ -1,0 +1,60 @@
+pipeline {
+    agent any
+    environment {
+        // Define environment variables, if needed
+        DEPLOYMENT_SERVER = 'your-deployment-server'
+        DEPLOY_PATH = '/path/to/deploy'
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                // Clone the repository
+                git 'https://github.com/MabuSubani1803/jenkins-build-deploy.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // Example build commands
+                echo 'Building the project...'
+                // If it's a Python project:
+                // sh 'pip install -r requirements.txt'
+                // If it's a Java project:
+                // sh 'mvn clean install'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // Example testing commands (if needed)
+                echo 'Running tests...'
+                // sh 'pytest tests/'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                // Example deployment to your server or environment
+                echo 'Deploying the project...'
+                // Deploy to a server (example with SSH)
+                sshagent(['your-ssh-credentials-id']) {
+                    sh '''
+                       scp -r * $DEPLOYMENT_SERVER:$DEPLOY_PATH
+                       ssh $DEPLOYMENT_SERVER "cd $DEPLOY_PATH && ./deploy.sh"
+                    '''
+                }
+                // Alternatively, you can deploy with Docker:
+                // sh 'docker build -t myimage .'
+                // sh 'docker run -d myimage'
+            }
+        }
+    }
+    post {
+        success {
+            echo 'Deployment was successful.'
+        }
+        failure {
+            echo 'Deployment failed.'
+        }
+    }
+}
